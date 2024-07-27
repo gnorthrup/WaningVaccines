@@ -16,10 +16,10 @@ get_eq <- function(w,v,mu,n,i) {
 }
 
 accel_wane <- function(epsilon0,p,n,i){
-  return(epsilon0*(((n-i)/n)^p))
+  return(epsilon0*(((n-i)/(n-1))^p))
 }
 hill_wane <- function(epsilon0,p,k,n,i){
-  return(epsilon0*(((n-i)^p)/(k^p+(n-i)^p)))
+  return(epsilon0*(((n-i)^p)/(k^p+(n-i)^p))*((k^p+(n-1)^p)/(n-1)^p))
 }
 
 get_susceptibility_accel <- function(w,v,mu,epsilon0,p,n){
@@ -45,7 +45,11 @@ shape <- c(50)
 i <- seq(1,100,1)
 n <- 100
 pdf(file="AccelShapes.pdf",width=4,height=4)
-plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5, ylab="Susceptibility", xlab="Fraction of Immunity Lost", frame=F, main="Early/Late Waning")
+plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5,
+     ylab="Susceptibility", xlab="Fraction of Immunity Lost",
+     frame=F, main="Early/Late Waning",yaxt='n')
+axis(2, at = c(0,1),
+     labels = c(0,expression(epsilon[0])))
 temp <- c()
 type = 1
 for (par in p){
@@ -65,7 +69,11 @@ shape <- c(50)
 i <- seq(1,100,1)
 n <- 100
 pdf(file="HillShapes1.pdf",width=4,height=4)
-plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5, ylab="Susceptibility", xlab="Fraction of Immunity Lost", frame=F, main="Hill Function Waning (fixed k)")
+plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5,
+     ylab="Susceptibility", xlab="Fraction of Immunity Lost",
+     frame=F, main="Hill Function Waning (fixed k)",yaxt='n')
+axis(2, at = c(0,1),
+     labels = c(0,expression(epsilon[0])))
 temp <- c()
 type <- 1
 for (par in p){
@@ -85,7 +93,11 @@ shape <- c(25,50,75)
 i <- seq(1,100,1)
 n <- 100
 pdf(file="HillShapes2.pdf",width=4,height=4)
-plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5, ylab="Susceptibility", xlab="Fraction of Immunity Lost", frame=F, main="Hill Function Waning (fixed p)")
+plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5,
+     ylab="Susceptibility", xlab="Fraction of Immunity Lost",
+     frame=F, main="Hill Function Waning (fixed p)",yaxt='n')
+axis(2, at = c(0,1),
+     labels = c(0,expression(epsilon[0])))
 temp <- c()
 type <- 1
 for (par in p){
@@ -236,7 +248,7 @@ p5 <- ggplot(diff_grid_hill,aes(epsilon0,p))+
   xlab(expression(paste("Relative susceptibility after waning (",epsilon[0],")")))+ylab("Waning shape parameter (p)")+
   theme_classic()+
   theme(text = element_text(size=20))+
-  ggtitle("Hill function (fixed k=50)")
+  ggtitle("Hill-like function (fixed k=50)")
 #print(p5)
 
 kh <- seq(1,100,1)
@@ -256,7 +268,7 @@ p6 <- ggplot(diff_grid_hill,aes(epsilon0,k))+
   theme_classic()+
   theme(text = element_text(size=20),legend.key.size = unit(2, 'cm'),
         legend.text = element_text(size=25))+
-  ggtitle("Hill function (fixed p=3)")
+  ggtitle("Hill-like function (fixed p=3)")
 #print(p6)
 
 library(cowplot)
