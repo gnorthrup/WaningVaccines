@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("~/Desktop/berkeley/Boots Lab/WaningVaccines")
+# setwd("~/Desktop/berkeley/Boots Lab/WaningVaccines")
 
 library(ggplot2)
 
@@ -46,8 +46,8 @@ i <- seq(1,100,1)
 n <- 100
 pdf(file="AccelShapes.pdf",width=4,height=4)
 plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5,
-     ylab="Susceptibility", xlab="Fraction of Immunity Lost",
-     frame=F, main="Early/Late Waning",yaxt='n')
+     ylab="Relative Susceptibility \n to Infection", xlab="\n \n Degree of 'Waning'",
+     frame=F, main="Early/Late Waning",yaxt='n',mgp = c(1.5, 0.1, 0))
 axis(2, at = c(0,1),
      labels = c(0,expression(epsilon[0])))
 temp <- c()
@@ -70,8 +70,8 @@ i <- seq(1,100,1)
 n <- 100
 pdf(file="HillShapes1.pdf",width=4,height=4)
 plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5,
-     ylab="Susceptibility", xlab="Fraction of Immunity Lost",
-     frame=F, main="Hill Function Waning (fixed k)",yaxt='n')
+     ylab="Relative Susceptibility \n to Infection", xlab="\n \n Degree of 'Waning'",
+     frame=F, main="Hill Function Waning (fixed k)",yaxt='n',mgp = c(1.5, 0.1, 0))
 axis(2, at = c(0,1),
      labels = c(0,expression(epsilon[0])))
 temp <- c()
@@ -94,8 +94,8 @@ i <- seq(1,100,1)
 n <- 100
 pdf(file="HillShapes2.pdf",width=4,height=4)
 plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5,
-     ylab="Susceptibility", xlab="Fraction of Immunity Lost",
-     frame=F, main="Hill Function Waning (fixed p)",yaxt='n')
+     ylab="Relative Susceptibility \n to Infection", xlab="\n \n Degree of 'Waning'",
+     frame=F, main="Hill Function Waning (fixed p)",yaxt='n',mgp = c(1.5, 0.1, 0))
 axis(2, at = c(0,1),
      labels = c(0,expression(epsilon[0])))
 temp <- c()
@@ -264,7 +264,7 @@ diff_grid_hill <- transform(diff_grid_hill, ratio=((1/susceptibility) - (1/get_s
 p6 <- ggplot(diff_grid_hill,aes(epsilon0,k))+
   geom_raster(aes(fill=ratio))+
   scale_fill_binned(breaks=c(0,.2,.4,.6,.8,1),low="white",high="black",name=expression(paste( R[inv]," fold change")))+
-  xlab(expression(paste("Relative susceptibility after waning (",epsilon[0],")")))+ylab("Half susceptibility constant (k)")+
+  xlab(expression(paste("Relative susceptibility after waning (",epsilon[0],")")))+ylab("Waning shape parameter (k)")+
   theme_classic()+
   theme(text = element_text(size=20),legend.key.size = unit(2, 'cm'),
         legend.text = element_text(size=25))+
