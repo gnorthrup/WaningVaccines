@@ -1,5 +1,5 @@
 rm(list=ls())
-# setwd("~/Desktop/berkeley/Boots Lab/WaningVaccines")
+setwd("~/Desktop/Berkeley/WaningVaccines")
 
 library(ggplot2)
 
@@ -21,6 +21,7 @@ accel_wane <- function(epsilon0,p,n,i){
 hill_wane <- function(epsilon0,p,k,n,i){
   return(epsilon0*(((n-i)^p)/(k^p+(n-i)^p))*((k^p+(n-1)^p)/(n-1)^p))
 }
+
 
 get_susceptibility_accel <- function(w,v,mu,epsilon0,p,n){
   total_s <- 0
@@ -221,10 +222,11 @@ v <- 1
 diff_grid <- expand.grid(w,mu,v,epsilon0,p)
 colnames(diff_grid) <- c("w","mu","v","epsilon0", "p")
 diff_grid <- transform(diff_grid, susceptibility=get_susceptibility_accel(w,v,mu,epsilon0,p,100))
-diff_grid <- transform(diff_grid, ratio=((1/susceptibility) - (1/get_susceptibility_accel(w,v,mu,1,1,100)))/(1/get_susceptibility_accel(w,v,mu,1,1,100)))
+diff_grid <- transform(diff_grid, ratio=((1/susceptibility) - (1/get_susceptibility_accel(w,v,mu,0.75,1,100)))/(1/get_susceptibility_accel(w,v,mu,0.75,1,100)))
 p4 <- ggplot(diff_grid,aes(epsilon0,p))+
   geom_raster(aes(fill=ratio))+
-  scale_fill_binned(breaks=c(0,.2,.4,.6,.8,1),low="white",high="black",name=expression(paste( R[inv]," fold change")))+
+  annotate("text",x=0.75, y=1, label = "*", color = "black", size = 8)+
+  scale_fill_binned(breaks=c(-0.4,-0.2,0,.2,.4,.6,.8,1),low="white",high="black",name=expression(paste( R[inv]," fold change")))+
   xlab(expression(paste("Relative susceptibility after waning (",epsilon[0],")")))+ylab("Waning shape parameter (p)")+
   theme_classic()+
   theme(text = element_text(size=20))+
@@ -241,10 +243,11 @@ v <- 1
 diff_grid_hill <- expand.grid(w,mu,v,epsilon0,ph)
 colnames(diff_grid_hill) <- c("w","mu","v","epsilon0", "p")
 diff_grid_hill <- transform(diff_grid_hill, susceptibility=get_susceptibility_hill(w,v,mu,epsilon0,50,p,100))
-diff_grid_hill <- transform(diff_grid_hill, ratio=((1/susceptibility) - (1/get_susceptibility_hill(w,v,mu,1,50,3,100)))/(1/get_susceptibility_hill(w,v,mu,1,50,3,100)))
+diff_grid_hill <- transform(diff_grid_hill, ratio=((1/susceptibility) - (1/get_susceptibility_hill(w,v,mu,0.75,50,5,100)))/(1/get_susceptibility_hill(w,v,mu,0.75,50,5,100)))
 p5 <- ggplot(diff_grid_hill,aes(epsilon0,p))+
   geom_raster(aes(fill=ratio))+
-  scale_fill_binned(breaks=c(0,.2,.4,.6,.8,1),low="white",high="black",name=expression(paste( R[inv]," fold change")))+
+  annotate("text",x=0.75, y=5, label = "*", color = "black", size = 8)+
+  scale_fill_binned(breaks=c(-0.2,0,.2,.4,.6,.8,1),low="white",high="black",name=expression(paste( R[inv]," fold change")))+
   xlab(expression(paste("Relative susceptibility after waning (",epsilon[0],")")))+ylab("Waning shape parameter (p)")+
   theme_classic()+
   theme(text = element_text(size=20))+
@@ -260,15 +263,16 @@ v <- 1
 diff_grid_hill <- expand.grid(w,mu,v,epsilon0,kh)
 colnames(diff_grid_hill) <- c("w","mu","v","epsilon0", "k")
 diff_grid_hill <- transform(diff_grid_hill, susceptibility=get_susceptibility_hill(w,v,mu,epsilon0,k,3,100))
-diff_grid_hill <- transform(diff_grid_hill, ratio=((1/susceptibility) - (1/get_susceptibility_hill(w,v,mu,1,50,5,100)))/(1/get_susceptibility_hill(w,v,mu,1,50,5,100)))
+diff_grid_hill <- transform(diff_grid_hill, ratio=((1/susceptibility) - (1/get_susceptibility_hill(w,v,mu,0.75,50,5,100)))/(1/get_susceptibility_hill(w,v,mu,0.75,50,5,100)))
 p6 <- ggplot(diff_grid_hill,aes(epsilon0,k))+
   geom_raster(aes(fill=ratio))+
-  scale_fill_binned(breaks=c(0,.2,.4,.6,.8,1),low="white",high="black",name=expression(paste( R[inv]," fold change")))+
+  annotate("text",x=0.75, y=50, label = "*", color = "black", size = 8)+
+  scale_fill_binned(breaks=c(-0.4,-0.2,0,.2,.4,.6,.8,1),low="white",high="black",name=expression(paste( R[inv]," fold change")))+
   xlab(expression(paste("Relative susceptibility after waning (",epsilon[0],")")))+ylab("Waning shape parameter (k)")+
   theme_classic()+
   theme(text = element_text(size=20),legend.key.size = unit(2, 'cm'),
         legend.text = element_text(size=25))+
-  ggtitle("Hill-like function (fixed p=3)")
+  ggtitle("Hill-like function (fixed p=5)")
 #print(p6)
 
 library(cowplot)
@@ -281,8 +285,87 @@ p6 <- p6+theme(legend.position = 'none')
 library(cowplot)
 plot_grid(p4,legend,p5,p6,nrow=2,rel_widths = c(.8,.8),labels=c("A)"," ", "B)","C)"))
 
-ggsave(filename = "Figure4.pdf",width=12,height=12)
+ggsave(filename = "Figure4Update.pdf",width=12,height=12)
 
 
 #################
+#Additional work#
+#################
 
+step_wane <- function(epsilon0,n,i,k){
+  if(i>k){
+    return(0)
+  }else{
+    return(epsilon0)
+  }
+}
+
+line_wane <- function(epsilon0,n,i){
+  return(epsilon0*(1 - i/n))
+}
+
+get_susceptibility_step <- function(w,v,mu,epsilon0,k,n){
+  total_s <- 0
+  for(i in 0:n){
+    total_s <- total_s + step_wane(epsilon0,n,i,k)*get_eq(w,v,mu,n,i)
+  }
+  return(total_s)
+}
+
+get_susceptibility_line <- function(w,v,mu,epsilon0,k,n){
+  total_s <- 0
+  for(i in 0:n){
+    total_s <- total_s + line_wane(epsilon0,n,i)*get_eq(w,v,mu,n,i)
+  }
+  return(total_s)
+}
+
+k <- 50
+i <- seq(1,100,1)
+n <- 100
+pdf(file="AUC.pdf",width=4,height=4)
+plot(NULL, xlim=c(0,1), ylim=c(0,1), cex.lab=1.5,
+     ylab="Relative Susceptibility \n to Infection", xlab="\n \n Degree of 'Waning'",
+     frame=F, main="Constant AUC",yaxt='n',mgp = c(1.5, 0.1, 0))
+axis(2, at = c(0,1),
+     labels = c(0,expression(epsilon[0])))
+temp <- c()
+type = 1
+for (par in k){
+  #for (k in shape){
+  for (j in i) {
+    temp[j] <- step_wane(1,n,j,par)
+  }
+  lines(1-i/100,temp,lty=type)
+  type <- type + 1
+  for (j in i) {
+    temp[j] <- line_wane(1,n,j)
+  }
+  lines(1-i/100,temp,lty=type)
+  type <- type + 1
+  #}
+}
+
+#legend(0,1,legend=c("k=25", "k=50", "k=75"), lty=1:3,cex=0.75)
+dev.off()
+
+w <- 1/seq(0.01,3,0.01)
+mu <- 0.02
+v <- seq(0,3,0.01)
+k <- 50
+epsilon0 <- c(1,0.7,0.5)
+i <- seq(1,100,1)
+n <- 100
+
+grid_1 <- expand.grid(w,mu,v,epsilon0,k)
+colnames(grid_1) <- c("w","mu","v","epsilon0", "p")
+grid_1 <- transform(grid_1, susceptibility_diff=get_susceptibility_line(w,v,mu,epsilon0,k,100) - get_susceptibility_step(w,v,mu,epsilon0,k,100))
+p1 <- ggplot(grid_1,aes(1/w,v))+
+  geom_raster(aes(fill=susceptibility_diff))+
+  facet_grid(~epsilon0, labeller = label_bquote(cols = epsilon[0] == .(epsilon0),rows=p==.(p)))+
+  scale_fill_continuous(low="white",high="black",name = "Susceptibility\n Difference")+
+  xlab(expression(paste("Average duration of immunity (",1/omega,")")))+
+  ylab(expression(paste("Vaccination rate (",nu,")")))+
+  theme_classic()+
+  theme(text = element_text(size=20))
+ggsave(filename = "ConstantAUC.pdf",width=7,height=3)
